@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>three.js app</title>
+		<style>
+			body {
+			  margin: 0;
+			  overflow: hidden;
+		  }
+		</style>
+	</head>
+	<body>
+		<script src="js/three.min.js"></script>
+		<script>
+      var renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10);
+
+      var textureLoader = new THREE.TextureLoader();
+
+      var scene = new THREE.Scene();
+
+      var geo = new THREE.PlaneGeometry(2, 1);
+      var material = new THREE.MeshBasicMaterial();
+      var plane = new THREE.Mesh(geo, material);
+      scene.add(plane);
+
+      camera.position.z = 4;
+
+      textureLoader.load("maps/webgl.logo.png", function(texture) {
+          plane.material.map = texture;
+          renderer.render(scene, camera);
+      })
+
+    </script>
+	</body>
+</html>
