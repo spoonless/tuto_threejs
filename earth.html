@@ -65,6 +65,7 @@
 
         map: THREE.ImageUtils.loadTexture("maps/earth/earth_color.jpg"),
         normalMap: THREE.ImageUtils.loadTexture("maps/earth/earth_normal.jpg"),
+        metalness: 0,
         roughness: .8
 
       } );
@@ -76,7 +77,8 @@
 
         transparent: true,
         alphaMap: THREE.ImageUtils.loadTexture("maps/earth/earth_cloud.jpg"),
-        roughness: .7
+        metalness: 0,
+        roughness: .5
 
       } );
       var clouds = new THREE.Mesh( planetGeo, cloudsMat );
@@ -90,6 +92,7 @@
       var moonMat = new THREE.MeshStandardMaterial( {
 
         map: THREE.ImageUtils.loadTexture("maps/moon/moon_color.jpg"),
+        metalness: 0,
         roughness: .9
 
       } );
@@ -100,7 +103,7 @@
       moon.add(moonPlanet);
 
       // lights
-      var ambientLight = new THREE.AmbientLight( 0x404040 , .4); // soft white light
+      var ambientLight = new THREE.AmbientLight( 0x404040 , .15); // soft white light
       scene.add( ambientLight );
 
       var sun = new THREE.DirectionalLight( 0xffffff, 1.1);

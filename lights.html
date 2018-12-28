@@ -112,7 +112,7 @@
       var gui = new dat.GUI();
 
       // création de l'objet dans la scène
-      materialProperties = {color: 0xf7e951, flatShading: false};
+      materialProperties = {color: 0xf7e951, metalness: 0};
       materials = {
         MeshLambertMaterial: new THREE.MeshLambertMaterial(materialProperties),
         MeshPhongMaterial: new THREE.MeshPhongMaterial(materialProperties),
