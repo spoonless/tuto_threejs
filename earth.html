@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>three.js app</title>
+		<style>
+			body {
+			  margin: 0;
+			  overflow: hidden;
+		  }
+		</style>
+	</head>
+	<body>
+		<script src="js/three.min.js"></script>
+		<script src="js/OrbitControls.js"></script>
+		<script>
+      var renderer = new THREE.WebGLRenderer();
+      document.body.appendChild( renderer.domElement );
+
+      var camera = new THREE.PerspectiveCamera( 45, 1, 0.1, 10000 );
+
+      function updateViewportSize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix()
+        renderer.setSize( window.innerWidth, window.innerHeight );
+      }
+
+      window.addEventListener("resize", updateViewportSize);
+      updateViewportSize();
+
+      var scene = new THREE.Scene();
+
+      // milkyway
+      var milkywayGeo = new THREE.SphereGeometry(5000, 8, 6);
+      var milkywayMat = new THREE.MeshBasicMaterial( {
+
+        map: THREE.ImageUtils.loadTexture("maps/milkyway/milkyway_color.jpg"),
+        side: THREE.BackSide
+
+      } );
+      var milkyway = new THREE.Mesh( milkywayGeo, milkywayMat );
+      milkyway.rotateZ(.3);
+      scene.add( milkyway );
+
+      // earth
+      var planetGeo = new THREE.SphereGeometry(1, 64, 48);
+      var earth = new THREE.Group();
+      scene.add( earth );
+
+      // atmosphere
+      var atmosphereMat = new THREE.MeshBasicMaterial( {
+
+        color: 0x1594c6,
+        transparent:true,
+        side: THREE.BackSide,
+        opacity: .3,
+
+      } );
+      var atmosphere = new THREE.Mesh( planetGeo, atmosphereMat );
+      atmosphere.scale.setScalar(1.01);
+      earth.add( atmosphere );
+
+      // earth planet
+      var earthMat = new THREE.MeshStandardMaterial( {
+
+        map: THREE.ImageUtils.loadTexture("maps/earth/earth_color.jpg"),
+        normalMap: THREE.ImageUtils.loadTexture("maps/earth/earth_normal.jpg"),
+        roughness: .8
+
+      } );
+      var earthPlanet = new THREE.Mesh( planetGeo, earthMat );
+      earth.add(earthPlanet);
+
+      // clouds
+      var cloudsMat = new THREE.MeshStandardMaterial( {
+
+        transparent: true,
+        alphaMap: THREE.ImageUtils.loadTexture("maps/earth/earth_cloud.jpg"),
+        roughness: .7
+
+      } );
+      var clouds = new THREE.Mesh( planetGeo, cloudsMat );
+      clouds.scale.setScalar(1.005);
+      earth.add( clouds );
+
+      // moon
+      var moon = new THREE.Group();
+      earth.add( moon );
+
+      var moonMat = new THREE.MeshStandardMaterial( {
+
+        map: THREE.ImageUtils.loadTexture("maps/moon/moon_color.jpg"),
+        roughness: .9
+
+      } );
+
+      var moonPlanet = new THREE.Mesh( planetGeo, moonMat );
+      moonPlanet.scale.setScalar(.2725);
+      moonPlanet.position.z=24;
+      moon.add(moonPlanet);
+
+      // lights
+      var ambientLight = new THREE.AmbientLight( 0x404040 , .4); // soft white light
+      scene.add( ambientLight );
+
+      var sun = new THREE.DirectionalLight( 0xffffff, 1.1);
+      sun.position.set( 50, 15, 50 );
+      scene.add( sun );
+
+      camera.position.z = 4;
+
+      var controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enablePan = false;
+      controls.update();
+      controls.minDistance = 2;
+      controls.maxDistance = 30;
+
+      function animate() {
+	      controls.update();
+
+				earthPlanet.rotateY(0.001);
+				clouds.rotateY(0.0011);
+				moon.rotateY(0.0002);
+				moonPlanet.lookAt(earth.position);
+
+	      requestAnimationFrame( animate );
+        renderer.render( scene, camera );
+      }
+      animate();
+    </script>
+	</body>
+</html>
