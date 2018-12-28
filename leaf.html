@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset=utf-8>
+    <title>three.js app</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      .instruction {
+        color: white;
+        position: fixed;
+        top: 0;
+        z-index: 1000;
+      }
+    </style>
+  </head>
+  <body>
+	  <div class="instruction">Utilisez les contrôles à droite pour activer/désactiver les lumières et modifier leurs propriétés.</div>
+    <script src="js/three.min.js"></script>
+		<script src="js/OrbitControls.js"></script>
+    <script src="js/dat.gui.min.js"></script>
+    <script>
+      function LightController(light) {
+
+        var helper;
+        var internalProps = {};
+
+        if (light.isDirectionalLight) {
+          helper = new THREE.DirectionalLightHelper(light);
+        } else if (light.isHemisphereLight) {
+          helper = new THREE.HemisphereLightHelper(light);
+        } else if (light.isPointLight) {
+          helper = new THREE.PointLightHelper(light);
+        } else if (light.isRectAreaLight) {
+          helper = new THREE.RectAreaLightHelper(light);
+        } else if (light.isSpotLight) {
+          helper = new THREE.SpotLightHelper(light);
+        }
+
+        if (helper) {
+          helper.visible = light.visible;
+        }
+
+        this.on = function(gui) {
+          gui.closed = !light.visible;
+          return {
+            add: function(property, minV, maxV, step) {
+              if (property in light && light[property] instanceof THREE.Color) {
+                internalProps[property] = light[property].getHex();
+                var ctrl = gui.addColor(internalProps, property);
+                ctrl.onChange(function(v) {
+                  light[property].setHex(v);
+                  if (helper) {
+                    helper.update();
+                  }
+                });
+                return this;
+              }
+              if (property in light) {
+                internalProps[property] = light[property];
+                var ctrl = gui.add(internalProps, property);
+                if (minV != undefined) {
+                  ctrl = ctrl.min(minV);
+                }
+                if (maxV != undefined) {
+                  ctrl = ctrl.max(maxV);
+                }
+                if (step != undefined) {
+                  ctrl = ctrl.step(step);
+                }
+                ctrl.onChange(function(v) {
+                  light[property] = v;
+                  if (helper) {
+                    helper.update();
+                    if (property == "visible") {
+                      helper.visible = light.visible;
+                    }
+                  }
+                });
+              }
+              return this;
+            }
+          };
+        }
+
+        this.helper = helper;
+      }
+
+      function TextureController(material) {
+        var maps = {};
+
+        this.on = function(gui) {
+          gui.visible = true;
+          return {
+            add: function (name, texture) {
+              this[name] = true;
+              maps[name] = texture;
+              material[name] = texture;
+              gui.add(this, name).onChange(function (val) {
+                material[name] = val ? maps[name] : null;
+                material.needsUpdate = true;
+              });
+              return this;
+            }
+          };
+        }
+      }
+
+      // création du renderer
+      var renderer = new THREE.WebGLRenderer();
+      document.body.appendChild(renderer.domElement);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      // création de la caméra
+      var camera = new THREE.PerspectiveCamera(45, 1, 0.5, 1000);
+
+      function updateViewportSize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix()
+        renderer.setSize( window.innerWidth, window.innerHeight );
+      }
+
+      window.addEventListener("resize", updateViewportSize);
+      updateViewportSize();
+
+      // création de la scène
+      var scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x666666);
+
+      var gui = new dat.GUI();
+      var textureLoader = new THREE.TextureLoader();
+
+      // définition du materiau
+      var material = new THREE.MeshStandardMaterial();
+      material.metalness = 0;
+      material.transparent = true;
+      var textureController = new TextureController(material);
+      textureController.on(gui.addFolder("Material"))
+                       .add("map", textureLoader.load("maps/leaf/Green_leaf_12_1K_front_Base_Color.png"))
+                       .add("normalMap", textureLoader.load("maps/leaf/Green_leaf_12_1K_front_Normal.png"))
+                       .add("alphaMap", textureLoader.load("maps/leaf/Green_leaf_12_1K_front_Opacity.png"))
+                       .add("roughnessMap", textureLoader.load("maps/leaf/Green_leaf_12_1K_front_Roughness.png"));
+
+      var leaf = new THREE.Mesh(
+          new THREE.PlaneGeometry(1.3, 2),
+          material
+      );
+      leaf.rotation.x = - Math.PI / 2;
+      scene.add(leaf);
+
+      // création des lumières
+      var lights = new THREE.Group();
+      var helpers = new THREE.Group();
+
+      gui.add(helpers, 'visible').name("Display helpers");
+
+      // Ambient Light
+      var light = new THREE.AmbientLight(0xffffff, .1);
+      lights.add(light);
+
+      var ctrl = new LightController(light);
+      ctrl.on(gui.addFolder('Ambient light'))
+          .add('visible')
+          .add('color')
+          .add('intensity', 0, 2);
+
+      // Hemisphere light
+      light = new THREE.HemisphereLight();
+      light.position.set(0,4,0);
+      light.intensity = .2;
+      lights.add(light);
+
+      ctrl = new LightController(light);
+      ctrl.on(gui.addFolder('Hemisphere light'))
+          .add('visible')
+          .add('color')
+          .add('groundColor')
+          .add('intensity', 0, 2);
+      helpers.add(ctrl.helper);
+
+      // Directional Light
+      light = new THREE.DirectionalLight();
+      light.position.set(3,4,0);
+      light.intensity = .8
+      lights.add(light);
+
+      ctrl = new LightController(light);
+      ctrl.on(gui.addFolder('Directional light'))
+          .add('visible')
+          .add('color')
+          .add('intensity', 0, 2);
+      helpers.add(ctrl.helper);
+
+      // Point light
+      light = new THREE.PointLight();
+      light.visible = false;
+      light.position.set(-3,2,0);
+      lights.add(light);
+
+      ctrl = new LightController(light);
+      ctrl.on(gui.addFolder('Point light'))
+          .add('visible')
+          .add('color')
+          .add('intensity', 0, 2);
+      helpers.add(ctrl.helper);
+
+      // Rect Area light
+      light = new THREE.RectAreaLight(0xffffff, 1, 5, 5);
+      light.visible = false;
+      light.position.set(0, 2, 4);
+      light.lookAt(0,0,0);
+      lights.add(light);
+
+      ctrl = new LightController(light);
+      ctrl.on(gui.addFolder('Rect Area light'))
+          .add('visible')
+          .add('color')
+          .add('intensity', 0, 5);
+      helpers.add(ctrl.helper);
+
+      // Spot Light
+      light = new THREE.SpotLight();
+      light.visible = false;
+      light.position.set(-3,5,0);
+      light.lookAt(0,0,0);
+      light.angle = .5;
+      light.distance = 10;
+      lights.add(light);
+
+      ctrl = new LightController(light);
+      ctrl.on(gui.addFolder('Spot light'))
+          .add('visible')
+          .add('color')
+          .add('intensity', 0, 2)
+          .add('distance', 1, 50)
+          .add('angle', 0, 1)
+          .add('penumbra', 0, 1)
+          .add('decay', 1, 2);
+      helpers.add(ctrl.helper);
+
+      scene.add(lights);
+      scene.add(helpers);
+
+      // positionnement de la caméra
+      camera.position.z = 1;
+      camera.position.y = 3;
+      camera.position.x = -3;
+
+      var controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enablePan = false;
+      controls.update();
+      controls.minDistance = 2;
+      controls.maxDistance = 30;
+      controls.maxPolarAngle = Math.PI / 2 - 0.3;
+
+      function animate() {
+	      controls.update();
+
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+
+      animate();
+    </script>
+  </body>
+</html>
+
