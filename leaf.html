@@ -17,7 +17,7 @@
     </style>
   </head>
   <body>
-	  <div class="instruction">Utilisez les contrôles à droite pour activer/désactiver les lumières et modifier leurs propriétés.</div>
+	  <div class="instruction">Utilisez les contrôles à droite pour activer/désactiver les lumières et les différentes textures.</div>
     <script src="js/three.min.js"></script>
 		<script src="js/OrbitControls.js"></script>
     <script src="js/dat.gui.min.js"></script>
@@ -92,7 +92,7 @@
         var maps = {};
 
         this.on = function(gui) {
-          gui.visible = true;
+          gui.closed = false;
           return {
             add: function (name, texture) {
               this[name] = true;
@@ -130,6 +130,13 @@
       scene.background = new THREE.Color(0x666666);
 
       var gui = new dat.GUI();
+      // création des lumières
+      var lights = new THREE.Group();
+      var helpers = new THREE.Group();
+      helpers.visible = false;
+
+      gui.add(helpers, 'visible').name("Display helpers");
+
       var textureLoader = new THREE.TextureLoader();
 
       // définition du materiau
@@ -150,11 +157,6 @@
       leaf.rotation.x = - Math.PI / 2;
       scene.add(leaf);
 
-      // création des lumières
-      var lights = new THREE.Group();
-      var helpers = new THREE.Group();
-
-      gui.add(helpers, 'visible').name("Display helpers");
 
       // Ambient Light
       var light = new THREE.AmbientLight(0xffffff, .1);
@@ -246,7 +248,7 @@
       // positionnement de la caméra
       camera.position.z = 1;
       camera.position.y = 3;
-      camera.position.x = -3;
+      camera.position.x = 1;
 
       var controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enablePan = false;
