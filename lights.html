@@ -17,9 +17,9 @@
     </style>
   </head>
   <body>
-	  <div class="instruction">Utilisez les contrôles à droite pour activer/désactiver les lumières et modifier leurs propriétés.</div>
+    <div class="instruction">Utilisez les contrôles à droite pour activer/désactiver les lumières et modifier leurs propriétés.</div>
     <script src="js/three.min.js"></script>
-		<script src="js/OrbitControls.js"></script>
+    <script src="js/OrbitControls.js"></script>
     <script src="js/dat.gui.min.js"></script>
     <script>
       function LightController(light) {
@@ -236,7 +236,7 @@
       controls.maxDistance = 30;
 
       function animate() {
-	      controls.update();
+        controls.update();
 
         object.rotateY(.05);
         requestAnimationFrame(animate);

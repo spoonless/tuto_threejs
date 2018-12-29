@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset=utf-8>
-		<title>three.js app</title>
-		<style>
-			body {
-			  margin: 0;
-			  overflow: hidden;
-		  }
-		</style>
-	</head>
-	<body>
-		<script src="js/three.min.js"></script>
-		<script src="js/OrbitControls.js"></script>
-		<script>
+  <head>
+    <meta charset=utf-8>
+    <title>three.js app</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="js/three.min.js"></script>
+    <script src="js/OrbitControls.js"></script>
+    <script>
       var renderer = new THREE.WebGLRenderer();
       document.body.appendChild( renderer.domElement );
 
@@ -119,17 +119,17 @@
       controls.maxDistance = 30;
 
       function animate() {
-	      controls.update();
+        controls.update();
 
-				earthPlanet.rotateY(0.001);
-				clouds.rotateY(0.0011);
-				moon.rotateY(0.0002);
-				moonPlanet.lookAt(earth.position);
+        earthPlanet.rotateY(0.001);
+        clouds.rotateY(0.0011);
+        moon.rotateY(0.0002);
+        moonPlanet.lookAt(earth.position);
 
-	      requestAnimationFrame( animate );
+        requestAnimationFrame( animate );
         renderer.render( scene, camera );
       }
       animate();
     </script>
-	</body>
+  </body>
 </html>

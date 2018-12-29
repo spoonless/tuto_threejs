@@ -17,9 +17,9 @@
     </style>
   </head>
   <body>
-	  <div class="instruction">Utilisez les contrôles à droite pour activer/désactiver les lumières et les différentes textures.</div>
+    <div class="instruction">Utilisez les contrôles à droite pour activer/désactiver les lumières et les différentes textures.</div>
     <script src="js/three.min.js"></script>
-		<script src="js/OrbitControls.js"></script>
+    <script src="js/OrbitControls.js"></script>
     <script src="js/dat.gui.min.js"></script>
     <script>
       function LightController(light) {
@@ -259,7 +259,7 @@
       controls.maxPolarAngle = Math.PI / 2 - 0.3;
 
       function animate() {
-	      controls.update();
+        controls.update();
 
         requestAnimationFrame(animate);
         renderer.render(scene, camera);

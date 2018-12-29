@@ -12,7 +12,7 @@
   </head>
   <body>
     <script src="js/three.min.js"></script>
-		<script src="js/OrbitControls.js"></script>
+    <script src="js/OrbitControls.js"></script>
     <script src="js/CurveExtras.js"></script>
     <script src="js/dat.gui.min.js"></script>
     <script>
@@ -74,7 +74,7 @@
       gui.add(params, "vitesse", 0.1, 20).name("Vitesse");
 
       function animate(timestamp) {
-	      controls.update();
+        controls.update();
 
         // on met à jour la position de chaque sphère le long de la courbe
         var p = timestamp * .0001 * params.vitesse;
