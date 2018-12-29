@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset=utf-8>
+    <title>three.js app</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      #panneau {
+        position: absolute;
+        z-index: 10;
+        max-width: 20em;
+        background-color: white;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="panneau">
+      Ceci est un cube avec son petit panneau HTML qui flotte autour.
+    </div>
+    <script src="js/three.min.js"></script>
+    <script src="js/OrbitControls.js"></script>
+    <script>
+      var renderer = new THREE.WebGLRenderer();
+      document.body.appendChild(renderer.domElement);
+
+      var camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.position.y = 2;
+      camera.position.z = 5;
+
+      function updateViewportSize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix()
+        renderer.setSize( window.innerWidth, window.innerHeight );
+      }
+
+      window.addEventListener("resize", updateViewportSize);
+      updateViewportSize();
+
+      var scene = new THREE.Scene();
+
+      var cube = new THREE.Mesh(new THREE.BoxGeometry());
+      scene.add(cube);
+
+      var empty = new THREE.Object3D();
+      empty.position.x = .75;
+      empty.position.y = .75;
+      cube.add(empty);
+
+      function getPositionOnScreen(camera, object3d) {
+        var vector = object3d.position.clone().project(camera);
+        // On passe des coordonnées dans le repère normalisé (NDC) aux
+        // coordonnées de l'écran
+        vector.x = Math.round((vector.x + 1) / 2 * window.innerWidth);
+        vector.y = Math.round(-(vector.y - 1) / 2 * window.innerHeight);
+
+        return vector;
+      }
+
+      // Création du contrôleur
+      var controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.autoRotate = true;
+      controls.minDistance = 2;
+      controls.maxDistance = 30;
+
+      function animate() {
+        // mise à jour du contrôleur
+        controls.update();
+
+        var pos = getPositionOnScreen(camera, empty);
+        panneau.style.left = pos.x + "px";
+        panneau.style.top = pos.y + "px";
+
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+    </script>
+  </body>
+</html>
