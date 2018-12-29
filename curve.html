@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset=utf-8>
+    <title>three.js app</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="js/three.min.js"></script>
+		<script src="js/OrbitControls.js"></script>
+    <script src="js/CurveExtras.js"></script>
+    <script src="js/dat.gui.min.js"></script>
+    <script>
+      // création du renderer
+      var renderer = new THREE.WebGLRenderer();
+      document.body.appendChild(renderer.domElement);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      // création de la caméra
+      var camera = new THREE.PerspectiveCamera(45, 1, 0.5, 100);
+
+      function updateViewportSize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix()
+        renderer.setSize( window.innerWidth, window.innerHeight );
+      }
+
+      var path = new THREE.Path();
+      path.arc(0, 0, 2, 0, Math.PI * 2);
+
+      window.addEventListener("resize", updateViewportSize);
+      updateViewportSize();
+
+      // création de la scène
+      var scene = new THREE.Scene();
+      scene.background = new THREE.Color(0, 0, 0);
+
+      var groupeSpheres = new THREE.Group();
+      scene.add(groupeSpheres);
+
+      // création des sphères
+      var geo = new THREE.SphereGeometry(.5, 32, 16);
+      for (var i = 0; i < 5; ++i) {
+        groupeSpheres.add(new THREE.Mesh(geo));
+      }
+
+      // création de la courbe et l'objet courbe
+      var curve = new THREE.Curves.HeartCurve(.5);
+      var curveObject = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(curve.getPoints(75)),
+        new THREE.LineBasicMaterial({ color : 0xdddddd })
+      );
+      curveObject.visible = false;
+
+      scene.add(curveObject);
+
+      // positionnement de la caméra
+      camera.position.z = 25;
+
+      // création du contrôleur de la caméra
+      var controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enablePan = false;
+      controls.minDistance = 2;
+      controls.maxDistance = 30;
+
+      var gui = new dat.GUI();
+      params = {vitesse: 1};
+      gui.add(curveObject, "visible").name("Afficher la courbe");
+      gui.add(params, "vitesse", 0.1, 20).name("Vitesse");
+
+      function animate(timestamp) {
+	      controls.update();
+
+        // on met à jour la position de chaque sphère le long de la courbe
+        var p = timestamp * .0001 * params.vitesse;
+        for(var i = 0; i < groupeSpheres.children.length; ++i) {
+          var t = (p + i * .2) % 1;
+          curve.getPoint(t, groupeSpheres.children[i].position);
+        }
+
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+
+      animate(0);
+    </script>
+  </body>
+</html>
+
