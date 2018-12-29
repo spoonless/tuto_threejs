@@ -142,6 +142,7 @@
       // définition du materiau
       var material = new THREE.MeshStandardMaterial();
       material.metalness = 0;
+      material.roughness = 1;
       material.transparent = true;
       var textureController = new TextureController(material);
       textureController.on(gui.addFolder("Material"))
