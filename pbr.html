@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset=utf-8>
+    <title>three.js app</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      .instruction {
+        color: white;
+        position: fixed;
+        top: 0;
+        z-index: 1000;
+      }
+    </style>
+  </head>
+  <body>
+	  <div class="instruction">Utilisez les contrôles tester le matériau.</div>
+    <script src="js/three.min.js"></script>
+		<script src="js/OrbitControls.js"></script>
+    <script src="js/dat.gui.min.js"></script>
+    <script>
+
+      // env map
+      var cubeTextureLoader = new THREE.CubeTextureLoader();
+      cubeTextureLoader.setPath('maps/machine_shop_02/machine_shop_02_');
+      var cubeTexture = cubeTextureLoader.load([
+        "5.jpg",
+        "1.jpg",
+        "4.jpg",
+        "2.jpg",
+        "6.jpg",
+        "3.jpg",
+      ]);
+
+      // création de l'objet dans la scène
+      var materialProperties = {color: 0xf7e951, metalness: 1, roughness: .3, envMap: cubeTexture, envMapIntensity: 1};
+      var material = new THREE.MeshPhysicalMaterial(materialProperties);
+
+      var gui = new dat.GUI();
+      gui.add(material, "roughness", 0, 1);
+      gui.add(material, "metalness", 0, 1);
+      gui.add(material, "envMapIntensity", 0, 3);
+      gui.add(material, "clearCoat", 0, 1);
+      gui.add(material, "clearCoatRoughness", 0, 1);
+      gui.add(material, "reflectivity", 0, 1);
+
+      // création du renderer
+      var renderer = new THREE.WebGLRenderer();
+      document.body.appendChild(renderer.domElement);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      // création de la caméra
+      var camera = new THREE.PerspectiveCamera(45, 1, 0.5, 1000);
+
+      function updateViewportSize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix()
+        renderer.setSize( window.innerWidth, window.innerHeight );
+      }
+
+      window.addEventListener("resize", updateViewportSize);
+      updateViewportSize();
+
+      // création de la scène
+      var scene = new THREE.Scene();
+      scene.background = new THREE.Color(0, 0, 0);
+
+      var object = new THREE.Mesh(
+          new THREE.TorusKnotGeometry(1, .4, 128, 16),
+          material
+      );
+
+      scene.add(object);
+
+      // création des lumières
+      var lights = new THREE.Group();
+
+      // Directional Light
+      var light = new THREE.DirectionalLight(0xffffff, .8);
+      light.position.set(3,4,0);
+      lights.add(light);
+
+      // react area Light
+      light = new THREE.PointLight(0xffffff, .5);
+      light.position.set(-3,0,0);
+      lights.add(light);
+
+      scene.add(lights);
+
+      // positionnement de la caméra
+      camera.position.z = 15;
+
+      var controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enablePan = false;
+      controls.update();
+      controls.minDistance = 2;
+      controls.maxDistance = 30;
+
+      function animate() {
+	      controls.update();
+
+        object.rotateY(.02);
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+
+      animate();
+    </script>
+  </body>
+</html>
+
