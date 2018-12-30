@@ -147,7 +147,7 @@
 
         controls.update();
 
-        var rotationTerre = 2 * Math.PI * t / (params.dureeJournee * 1000);
+        var rotationTerre = 2 * Math.PI * delai / (params.dureeJournee * 1000);
         earthPlanet.rotation.y = rotationTerre;
         clouds.rotation.y = rotationTerre * params.vitesseNuages ;
         moon.rotation.y = rotationTerre / 27.321;
