@@ -8,16 +8,30 @@
         margin: 0;
         overflow: hidden;
       }
-      .instruction {
+      .maps {
         color: white;
         position: fixed;
         top: 0;
         z-index: 1000;
+        background-color: black;
+      }
+      .texture {
+        max-width: 200px;
+        display: block;
       }
     </style>
   </head>
   <body>
-    <div class="instruction">Utilisez les contrôles à droite pour activer/désactiver les lumières et les différentes textures.</div>
+    <div class="maps">
+        Color Map
+        <img class="texture" src="maps/leaf/Green_leaf_12_1K_front_Base_Color.png">
+        Normal map
+        <img class="texture" src="maps/leaf/Green_leaf_12_1K_front_Normal.png">
+        Alpha map
+        <img class="texture" src="maps/leaf/Green_leaf_12_1K_front_Opacity.png">
+        Roughness map
+        <img class="texture" src="maps/leaf/Green_leaf_12_1K_front_Roughness.png">
+    </div>
     <script src="js/three.min.js"></script>
     <script src="js/OrbitControls.js"></script>
     <script src="js/dat.gui.min.js"></script>
