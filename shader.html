@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset=utf-8>
+    <title>three.js app</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <script id="vertexShader" type="x-shader/x-vertex">
+        varying float cameraDist;
+        void main()
+        {
+          vec4 posInView = modelViewMatrix * vec4(position, 1.0);
+          cameraDist = length(posInView);
+          gl_Position = projectionMatrix * posInView;
+        }
+    </script>
+
+    <script id ="fragmentShader" type="x-shader/x-fragment">
+        uniform vec3 baseColor;
+        precision mediump float;
+        varying float cameraDist;
+
+        void main()
+        {
+            gl_FragColor = vec4(baseColor * mix(1.0, 0.0, cameraDist / 35.0), 1.0);
+        }
+    </script>
+
+    <script src="js/three.min.js"></script>
+    <script src="js/OrbitControls.js"></script>
+    <script>
+      var renderer = new THREE.WebGLRenderer();
+      document.body.appendChild(renderer.domElement);
+
+      var camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.position.y = 2;
+      camera.position.z = 5;
+
+      function updateViewportSize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix()
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      window.addEventListener("resize", updateViewportSize);
+      updateViewportSize();
+
+      var scene = new THREE.Scene();
+
+      var shaderMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          baseColor : {value: new THREE.Color(1,0,0)},
+        },
+        vertexShader: document.getElementById("vertexShader").textContent,
+        fragmentShader: document.getElementById("fragmentShader").textContent,
+      });
+
+      var cube = new THREE.Mesh(new THREE.BoxBufferGeometry(), shaderMaterial);
+      scene.add(cube);
+
+      // Création du contrôleur
+      var controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.autoRotate = true;
+      controls.minDistance = 2;
+      controls.maxDistance = 30;
+
+      function animate() {
+        // mise à jour du contrôleur
+        controls.update();
+
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+    </script>
+  </body>
+</html>
