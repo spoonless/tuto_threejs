@@ -11,24 +11,67 @@
     </style>
   </head>
   <body>
+    <!--
+      Implémentation simplifiée du shader de Gouraud.
+    -->
     <script id="vertexShader" type="x-shader/x-vertex">
+        precision mediump float;
+        uniform vec3 lightPosition;
+        uniform vec3 baseColor;
         varying float cameraDist;
+        varying vec3 fragColor;
+
         void main()
         {
-          vec4 posInView = modelViewMatrix * vec4(position, 1.0);
-          cameraDist = length(posInView);
-          gl_Position = projectionMatrix * posInView;
+          /*
+          * On transforme la position et la normal de l'espace de coordonnées
+          * local à l'espace de coordonnées du monde (world space coodinates)
+          */
+          vec4 wsPosition = modelViewMatrix * vec4(position, 1.0);
+          vec3 wsNormal = normalize(normalMatrix * normal);
+          /*
+          * Pour une lumière positionnelle, le vecteur lumière est donné
+          * par la position de la lumière moins la position du vertex.
+          */
+          vec3 wsLightVector = normalize(lightPosition - wsPosition.xyz);
+
+          /*
+          * Calcul du coefficient de Lambert qui correspond au cosinus de l'angle
+          * entre le vecteur lumière et le vecteur normal.
+          */
+          float lambertian = dot(wsLightVector, wsNormal);
+
+          /*
+          * Calcul de la composante diffuse grâce au coefficient de Lambert
+          * et aux caractéristiques de la lumière et du matériau
+          */
+          vec3 diffuse = baseColor * clamp(lambertian, .0, 1.0);
+
+          gl_Position = projectionMatrix * wsPosition;
+          /*
+          * On passe la couleur du vertex au fragment shader
+          */
+          fragColor = diffuse;
+          /*
+          * On calcule la distance par rapport à la caméra
+          */
+          cameraDist = length(wsPosition);
         }
     </script>
 
+    <!--
+      Fragment shader avec une implémentation simplifiée de brouillard.
+      Il y un falloff de la lumière à mesure que l'objet s'éloigne de la caméra.
+    -->
     <script id ="fragmentShader" type="x-shader/x-fragment">
-        uniform vec3 baseColor;
         precision mediump float;
+        varying vec3 fragColor;
         varying float cameraDist;
 
         void main()
         {
-            gl_FragColor = vec4(baseColor * mix(1.0, 0.0, cameraDist / 35.0), 1.0);
+          float falloff = mix(1.0, 0.0, cameraDist / 35.0);
+          gl_FragColor = vec4(fragColor * falloff, 1.0);
         }
     </script>
 
@@ -57,6 +100,7 @@
       var shaderMaterial = new THREE.ShaderMaterial({
         uniforms: {
           baseColor : {value: new THREE.Color(1,0,0)},
+          lightPosition : {value: new THREE.Vector3(2,2,2)},
         },
         vertexShader: document.getElementById("vertexShader").textContent,
         fragmentShader: document.getElementById("fragmentShader").textContent,
