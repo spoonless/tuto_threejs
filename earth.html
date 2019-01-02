@@ -112,6 +112,7 @@
       moonPlanet.position.z=24;
       moon.add(moonPlanet);
 
+
       // lights
       var ambientLight = new THREE.AmbientLight(0x404040 , .15); // soft white light
       scene.add(ambientLight);
@@ -136,6 +137,7 @@
       gui.add(params, "vitesseNuages").min(0).max(2).name("Nuages");
 
       var start = null;
+      var wsEarthPosition = new THREE.Vector3();
       function animate(t) {
         if (start == null) {
           start = t;
@@ -148,7 +150,8 @@
         earthPlanet.rotation.y = rotationTerre;
         clouds.rotation.y = rotationTerre * params.vitesseNuages ;
         moon.rotation.y = rotationTerre / 27.321;
-        moonPlanet.lookAt(earth.position);
+        earth.getWorldPosition(wsEarthPosition)
+        moonPlanet.lookAt(wsEarthPosition);
 
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
