@@ -52,7 +52,7 @@
       cube.add(empty);
 
       function getPositionOnScreen(camera, object3d) {
-        var vector = object3d.position.clone().project(camera);
+        var vector = object3d.getWorldPosition().project(camera);
         // On passe des coordonnées dans le repère normalisé (NDC) aux
         // coordonnées de l'écran
         vector.x = Math.round((vector.x + 1) / 2 * window.innerWidth);
