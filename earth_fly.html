@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset=utf-8>
+    <title>three.js app</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="js/three.min.js"></script>
+    <script src="js/FlyControls.js"></script>
+    <script src="js/dat.gui.min.js"></script>
+    <script>
+      var renderer = new THREE.WebGLRenderer();
+      document.body.appendChild(renderer.domElement);
+
+      var camera = new THREE.PerspectiveCamera(45, 1, 0.1, 10000);
+
+      function updateViewportSize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix()
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      window.addEventListener("resize", updateViewportSize);
+      updateViewportSize();
+
+      var scene = new THREE.Scene();
+
+      var cubeTextureLoader = new THREE.CubeTextureLoader();
+      var textureLoader = new THREE.TextureLoader();
+
+      // milkyway
+      cubeTextureLoader.setPath('maps/milkyway/');
+      var milkyway = cubeTextureLoader.load([
+        "1.jpg",
+        "2.jpg",
+        "3.jpg",
+        "4.jpg",
+        "5.jpg",
+        "6.jpg",
+      ]);
+      scene.background = milkyway;
+
+      // earth
+      var planetGeo = new THREE.SphereGeometry(1, 64, 48);
+      var earth = new THREE.Group();
+      scene.add(earth);
+
+      // atmosphere
+      var atmosphereMat = new THREE.MeshBasicMaterial({
+
+        color: 0x1594c6,
+        transparent:true,
+        side: THREE.BackSide,
+        opacity: .3,
+
+      });
+      var atmosphere = new THREE.Mesh(planetGeo, atmosphereMat);
+      atmosphere.scale.setScalar(1.01);
+      earth.add(atmosphere);
+
+      // earth planet
+      textureLoader.setPath("maps/earth/earth_")
+      var earthMat = new THREE.MeshStandardMaterial({
+
+        map: textureLoader.load("color.jpg"),
+        normalMap: textureLoader.load("normal.jpg"),
+        metalness: 0,
+        roughness: .8
+
+      });
+      var earthPlanet = new THREE.Mesh(planetGeo, earthMat);
+      earth.add(earthPlanet);
+
+      // clouds
+      var cloudsMat = new THREE.MeshStandardMaterial({
+
+        transparent: true,
+        alphaMap: textureLoader.load("cloud.jpg"),
+        metalness: 0,
+        roughness: .5
+
+      });
+      var clouds = new THREE.Mesh(planetGeo, cloudsMat);
+      clouds.scale.setScalar(1.005);
+      earth.add(clouds);
+
+      // moon
+      textureLoader.setPath("maps/moon/moon_")
+      var moon = new THREE.Group();
+      earth.add(moon);
+
+      var moonMat = new THREE.MeshStandardMaterial({
+
+        map: textureLoader.load("color.jpg"),
+        metalness: 0,
+        roughness: .9
+
+      });
+      // on déplace la texture le long de l'axe U pour aligner la face visible
+      // depuis la terre.
+      moonMat.map.offset = new THREE.Vector2(.3, 0);
+      moonMat.map.wrapS = THREE.RepeatWrapping;
+
+      var moonPlanet = new THREE.Mesh(planetGeo, moonMat);
+      moonPlanet.scale.setScalar(.2723);
+      moonPlanet.position.z=24;
+      moon.add(moonPlanet);
+
+
+      // lights
+      var ambientLight = new THREE.AmbientLight(0x404040 , .15); // soft white light
+      scene.add(ambientLight);
+
+      var sun = new THREE.DirectionalLight(0xffffff, 1.1);
+      sun.position.set(50, 15, 50);
+      scene.add(sun);
+
+      camera.position.z = 4;
+
+      var controls = new THREE.FlyControls(camera, renderer.domElement);
+      controls.movementSpeed = .000001;
+      controls.rollSpeed = .000001
+
+      var params = {
+        dureeJournee: 30,
+        vitesseNuages: 1.15
+      };
+      var gui = new dat.GUI();
+      gui.add(params, "dureeJournee").min(1).max(60).name("Rotation en s");
+      gui.add(params, "vitesseNuages").min(0).max(2).name("Nuages");
+
+      var start = null;
+      var wsEarthPosition = new THREE.Vector3();
+      function animate(t) {
+        if (start == null) {
+          start = t;
+        }
+        var delai = t - start;
+
+        controls.update(t);
+
+        var rotationTerre = 2 * Math.PI * delai / (params.dureeJournee * 1000);
+        earthPlanet.rotation.y = rotationTerre;
+        clouds.rotation.y = rotationTerre * params.vitesseNuages ;
+        moon.rotation.y = rotationTerre / 27.321;
+        earth.getWorldPosition(wsEarthPosition)
+        moonPlanet.lookAt(wsEarthPosition);
+
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      requestAnimationFrame(animate);
+    </script>
+  </body>
+</html>
