@@ -46,9 +46,18 @@
       ]);
       scene.background = milkyway;
 
+      function createAxesHelperOnLayer(layer) {
+        var axes = new THREE.AxesHelper(1.6);
+        axes.material.depthTest = false;
+        axes.renderOrder = 100;
+        axes.layers.set(layer);
+        return axes;
+      }
+
       // earth
       var planetGeo = new THREE.SphereGeometry(1, 64, 48);
       var earth = new THREE.Group();
+      earth.add(createAxesHelperOnLayer(30));
       scene.add(earth);
 
       // atmosphere
@@ -76,6 +85,7 @@
       });
       var earthPlanet = new THREE.Mesh(planetGeo, earthMat);
       earth.add(earthPlanet);
+      earthPlanet.add(createAxesHelperOnLayer(30));
 
       // clouds
       var cloudsMat = new THREE.MeshStandardMaterial({
@@ -89,11 +99,13 @@
       var clouds = new THREE.Mesh(planetGeo, cloudsMat);
       clouds.scale.setScalar(1.005);
       earth.add(clouds);
+      clouds.add(createAxesHelperOnLayer(30));
 
       // moon
       textureLoader.setPath("maps/moon/moon_")
       var moon = new THREE.Group();
       earth.add(moon);
+      moon.add(createAxesHelperOnLayer(31));
 
       var moonMat = new THREE.MeshStandardMaterial({
 
@@ -110,8 +122,8 @@
       var moonPlanet = new THREE.Mesh(planetGeo, moonMat);
       moonPlanet.scale.setScalar(.2723);
       moonPlanet.position.z=24;
+      moonPlanet.add(createAxesHelperOnLayer(31));
       moon.add(moonPlanet);
-
 
       // lights
       var ambientLight = new THREE.AmbientLight(0x404040 , .15); // soft white light
@@ -130,14 +142,19 @@
 
       var params = {
         dureeJournee: 30,
-        vitesseNuages: 1.15
+        vitesseNuages: 1.15,
+        axesTerre: false,
+        axesLune: false,
       };
       var gui = new dat.GUI();
+      gui.add(params, "axesTerre").name("Axes Terre").onChange(function(v) {camera.layers.toggle(30)});
+      gui.add(params, "axesLune").name("Axes Lune").onChange(function(v) {camera.layers.toggle(31)});
       gui.add(params, "dureeJournee").min(1).max(60).name("Rotation en s");
       gui.add(params, "vitesseNuages").min(0).max(2).name("Nuages");
 
       var start = null;
       var wsEarthPosition = new THREE.Vector3();
+
       function animate(t) {
         if (start == null) {
           start = t;
