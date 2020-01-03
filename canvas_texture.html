@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset=utf-8>
+    <title>three.js app</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="drawing-canvas" style="display:none" height="1024" width="1024"></canvas>
+    <script src="js/three.min.js"></script>
+    <script src="js/SceneUtils.js"></script>
+    <script>
+      var renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10);
+
+      var textureLoader = new THREE.TextureLoader();
+
+      var scene = new THREE.Scene();
+
+      var geo = new THREE.SphereGeometry(.5, 128, 64);
+      var material1 = new THREE.MeshBasicMaterial();
+      var material2 = new THREE.MeshBasicMaterial();
+
+      var drawingCanvas = document.getElementById('drawing-canvas');
+      material2.map = new THREE.CanvasTexture(drawingCanvas);
+
+      var drawingContext = drawingCanvas.getContext('2d');
+      drawingContext.fillStyle = 'rgba(255, 0, 0, 1)';
+      drawingContext.fillRect(0,0,250,250);
+      material1.writeDepth = false;
+      material2.map.needsUpdate = true;
+      material2.transparent = true;
+
+      var plane = THREE.SceneUtils.createMultiMaterialObject(geo, [material1, material2]);
+      scene.add(plane);
+
+      camera.position.z = 4;
+
+      textureLoader.load("maps/webgl.logo.png", function(texture) {
+          material1.map = texture;
+          material1.needsUpdate = true;
+          renderer.render(scene, camera);
+      })
+
+      renderer.render(scene, camera);
+    </script>
+  </body>
+</html>
