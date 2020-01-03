@@ -8,13 +8,78 @@
         margin: 0;
         overflow: hidden;
       }
+
+      .billboard {
+        position: absolute;
+        z-index: 10;
+        max-width: 20em;
+        color: white;
+        background-color: black;
+        padding: 10px;
+        font-family: "Sans-Serif";
+        border-radius: 5px;
+        border: 1px solid white;
+        pointer-events:none;
+      }
     </style>
   </head>
   <body>
+    <div id="moonBillboard" class="billboard">La Lune</div>
+    <div id="earthBillboard" class="billboard">La Terre</div>
     <script src="js/three.min.js"></script>
     <script src="js/OrbitControls.js"></script>
     <script src="js/dat.gui.min.js"></script>
     <script>
+      class BillboardEngine {
+
+        constructor(camera) {
+          this.camera = camera;
+          this.frustum = new THREE.Frustum();
+          this.vector = new THREE.Vector3();
+          this.billboards = new Array();
+          this.display = true;
+        }
+
+        addBillboard(htmlElementId, placeholder, target) {
+          this.billboards.push({
+            "htmlElement": document.getElementById(htmlElementId),
+            "placeholder": placeholder,
+            "target": target
+          });
+        }
+
+        toggle() {
+          this.display = ! this.display;
+          if (! this.display) {
+            for (let b of this.billboards) {
+              b.htmlElement.style.left = "-1000px";
+              b.htmlElement.style.top = "-1000px";
+            }
+          }
+        }
+
+        update() {
+          if (! this.display) {
+            return;
+          }
+          this.frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(self.camera.projectionMatrix, self.camera.matrixWorldInverse));
+          for (let b of this.billboards) {
+            if (this.frustum.intersectsObject(b.target)) {
+              this.vector = b.placeholder.getWorldPosition(this.vector).project(this.camera);
+              // On passe des coordonnées dans le repère normalisé (NDC) aux
+              // coordonnées de l'écran
+              this.vector.x = Math.round((this.vector.x + 1) / 2 * window.innerWidth);
+              this.vector.y = Math.round(-(this.vector.y - 1) / 2 * window.innerHeight);
+            } else {
+              this.vector.x = 0;
+              this.vector.y = - b.htmlElement.offsetHeight;
+            }
+            b.htmlElement.style.left = this.vector.x + "px";
+            b.htmlElement.style.top = this.vector.y - b.htmlElement.offsetHeight + "px";
+          }
+        }
+      }
+
       var renderer = new THREE.WebGLRenderer();
       document.body.appendChild(renderer.domElement);
 
@@ -101,6 +166,12 @@
       earth.add(clouds);
       clouds.add(createAxesHelperOnLayer(30));
 
+      // earth billboard
+      var earthBillboard = new THREE.Object3D();
+      earthBillboard.position.x = .6;
+      earthBillboard.position.y = 1;
+      earth.add(earthBillboard);
+
       // moon
       textureLoader.setPath("maps/moon/moon_")
       var moon = new THREE.Group();
@@ -125,6 +196,12 @@
       moonPlanet.add(createAxesHelperOnLayer(31));
       moon.add(moonPlanet);
 
+      // moon billboard
+      var moonBillboard = new THREE.Object3D();
+      moonBillboard.position.x = .6;
+      moonBillboard.position.y = 1.3;
+      moonPlanet.add(moonBillboard);
+
       // lights
       var ambientLight = new THREE.AmbientLight(0x404040 , .15); // soft white light
       scene.add(ambientLight);
@@ -145,15 +222,21 @@
         vitesseNuages: 1.15,
         axesTerre: false,
         axesLune: false,
+        billboard: true,
       };
+
+      var start = null;
+      var wsEarthPosition = new THREE.Vector3();
+      var billboardEngine = new BillboardEngine(camera);
+      billboardEngine.addBillboard("earthBillboard", earthBillboard, earthPlanet);
+      billboardEngine.addBillboard("moonBillboard", moonBillboard, moonPlanet);
+
       var gui = new dat.GUI();
+      gui.add(params, "billboard").name("Panneau info").onChange(function(v) {billboardEngine.toggle()});
       gui.add(params, "axesTerre").name("Axes Terre").onChange(function(v) {camera.layers.toggle(30)});
       gui.add(params, "axesLune").name("Axes Lune").onChange(function(v) {camera.layers.toggle(31)});
       gui.add(params, "dureeJournee").min(1).max(60).name("Rotation en s");
       gui.add(params, "vitesseNuages").min(0).max(2).name("Nuages");
-
-      var start = null;
-      var wsEarthPosition = new THREE.Vector3();
 
       function animate(t) {
         if (start == null) {
@@ -169,6 +252,8 @@
         moon.rotation.y = rotationTerre / 27.321;
         earth.getWorldPosition(wsEarthPosition)
         moonPlanet.lookAt(wsEarthPosition);
+
+        billboardEngine.update();
 
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
