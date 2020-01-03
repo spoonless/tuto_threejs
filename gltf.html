@@ -27,7 +27,7 @@
           helper = new THREE.HemisphereLightHelper(light);
         } else if (light.isPointLight) {
           helper = new THREE.PointLightHelper(light);
-        } else if (light.isRectAreaLight) {
+        } else if (light.isRectAreaLight && THREE.RectAreaLightHelper) {
           helper = new THREE.RectAreaLightHelper(light);
         } else if (light.isSpotLight) {
           helper = new THREE.SpotLightHelper(light);

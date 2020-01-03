@@ -4,9 +4,16 @@
 
 THREE.FlyControls = function ( object, domElement ) {
 
-	this.object = object;
+	if ( domElement === undefined ) {
 
-	this.domElement = ( domElement !== undefined ) ? domElement : document;
+		console.warn( 'THREE.FlyControls: The second parameter "domElement" is now mandatory.' );
+		domElement = document;
+
+	}
+
+	this.object = object;
+	this.domElement = domElement;
+
 	if ( domElement ) this.domElement.setAttribute( 'tabindex', - 1 );
 
 	// API
@@ -14,7 +21,7 @@ THREE.FlyControls = function ( object, domElement ) {
 	this.movementSpeed = 1.0;
 	this.rollSpeed = 0.005;
 
-	this.dragToLook = true;
+	this.dragToLook = false;
 	this.autoForward = false;
 
 	// disable default target object behavior
@@ -43,10 +50,10 @@ THREE.FlyControls = function ( object, domElement ) {
 
 			case 16: /* shift */ this.movementSpeedMultiplier = .1; break;
 
-			case 90: /*W*/ this.moveState.forward = 1; break;
+			case 87: /*W*/ this.moveState.forward = 1; break;
 			case 83: /*S*/ this.moveState.back = 1; break;
 
-			case 81: /*A*/ this.moveState.left = 1; break;
+			case 65: /*A*/ this.moveState.left = 1; break;
 			case 68: /*D*/ this.moveState.right = 1; break;
 
 			case 82: /*R*/ this.moveState.up = 1; break;
@@ -58,7 +65,7 @@ THREE.FlyControls = function ( object, domElement ) {
 			case 37: /*left*/ this.moveState.yawLeft = 1; break;
 			case 39: /*right*/ this.moveState.yawRight = 1; break;
 
-			case 65: /*Q*/ this.moveState.rollLeft = 1; break;
+			case 81: /*Q*/ this.moveState.rollLeft = 1; break;
 			case 69: /*E*/ this.moveState.rollRight = 1; break;
 
 		}
@@ -74,10 +81,10 @@ THREE.FlyControls = function ( object, domElement ) {
 
 			case 16: /* shift */ this.movementSpeedMultiplier = 1; break;
 
-			case 90: /*W*/ this.moveState.forward = 0; break;
+			case 87: /*W*/ this.moveState.forward = 0; break;
 			case 83: /*S*/ this.moveState.back = 0; break;
 
-			case 81: /*A*/ this.moveState.left = 0; break;
+			case 65: /*A*/ this.moveState.left = 0; break;
 			case 68: /*D*/ this.moveState.right = 0; break;
 
 			case 82: /*R*/ this.moveState.up = 0; break;
@@ -89,7 +96,7 @@ THREE.FlyControls = function ( object, domElement ) {
 			case 37: /*left*/ this.moveState.yawLeft = 0; break;
 			case 39: /*right*/ this.moveState.yawRight = 0; break;
 
-			case 65: /*Q*/ this.moveState.rollLeft = 0; break;
+			case 81: /*Q*/ this.moveState.rollLeft = 0; break;
 			case 69: /*E*/ this.moveState.rollRight = 0; break;
 
 		}
