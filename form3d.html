@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset=utf-8>
+    <title>three.js app</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      .formulaire {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="js/three.min.js"></script>
+    <script>
+      // création du renderer
+      var renderer = new THREE.WebGLRenderer();
+      document.body.appendChild(renderer.domElement);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      // création de la caméra
+      var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.5, 1000);
+
+      // création de la scène
+      var scene = new THREE.Scene();
+
+      // couleur de fond noire
+      scene.background = new THREE.Color(0, 0, 0);
+
+      // création du mesh et ajout dans la scène
+      var mesh = new THREE.Mesh(new THREE.BoxGeometry());
+      scene.add(mesh);
+      scene.add(camera);
+
+      // positionnement de la caméra
+      camera.position.z = 5;
+      camera.position.y = 4;
+      camera.lookAt(mesh.position);
+
+      // rendu
+      renderer.render(scene, camera);
+    </script>
+    <div class="formulaire">
+      <div>
+      position
+      <input type="range" min="-2.0" max="2.0" step=".001" oninput="mesh.position.x = parseFloat(this.value); renderer.render(scene, camera);">
+      <input type="range" min="-2.0" max="2.0" step=".001" oninput="mesh.position.y = parseFloat(this.value); renderer.render(scene, camera);">
+      <input type="range" min="-2.0" max="2.0" step=".001" oninput="mesh.position.z = parseFloat(this.value); renderer.render(scene, camera);">
+      </div>
+      <div>
+      rotation
+      <input type="range" min="-2.0" max="2.0" step=".001" oninput="mesh.rotation.x = parseFloat(this.value); renderer.render(scene, camera);">
+      <input type="range" min="-2.0" max="2.0" step=".001" oninput="mesh.rotation.y = parseFloat(this.value); renderer.render(scene, camera);">
+      <input type="range" min="-2.0" max="2.0" step=".001" oninput="mesh.rotation.z = parseFloat(this.value); renderer.render(scene, camera);">
+      </div>
+      <div>
+      scale
+      <input type="range" min="0" max="4.0" step=".001" oninput="mesh.scale.x = parseFloat(this.value); renderer.render(scene, camera);">
+      <input type="range" min="0" max="4.0" step=".001" oninput="mesh.scale.y = parseFloat(this.value); renderer.render(scene, camera);">
+      <input type="range" min="0" max="4.0" step=".001" oninput="mesh.scale.z = parseFloat(this.value); renderer.render(scene, camera);">
+      </div>
+    </div>
+  </body>
+</html>
