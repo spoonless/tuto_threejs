@@ -67,7 +67,7 @@
           this.frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(self.camera.projectionMatrix, self.camera.matrixWorldInverse));
           for (let b of this.billboards) {
             if (this.frustum.intersectsObject(b.target)) {
-              this.vector = b.placeholder.getWorldPosition(this.vector).project(this.camera);
+              b.placeholder.getWorldPosition(this.vector).project(this.camera);
               // On passe des coordonnées dans le repère normalisé (NDC) aux
               // coordonnées de l'écran
               this.vector.x = Math.round((this.vector.x + 1) / 2 * window.innerWidth);
