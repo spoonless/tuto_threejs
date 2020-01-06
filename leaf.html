@@ -47,7 +47,7 @@
           helper = new THREE.HemisphereLightHelper(light);
         } else if (light.isPointLight) {
           helper = new THREE.PointLightHelper(light);
-        } else if (light.isRectAreaLight) {
+        } else if (light.isRectAreaLight && THREE.RectAreaLightHelper) {
           helper = new THREE.RectAreaLightHelper(light);
         } else if (light.isSpotLight) {
           helper = new THREE.SpotLightHelper(light);
@@ -195,7 +195,7 @@
           .add('color')
           .add('groundColor')
           .add('intensity', 0, 2);
-      helpers.add(ctrl.helper);
+      if (ctrl.helper) helpers.add(ctrl.helper);
 
       // Directional Light
       light = new THREE.DirectionalLight();
@@ -208,7 +208,7 @@
           .add('visible')
           .add('color')
           .add('intensity', 0, 2);
-      helpers.add(ctrl.helper);
+      if (ctrl.helper) helpers.add(ctrl.helper);
 
       // Point light
       light = new THREE.PointLight();
@@ -220,7 +220,7 @@
           .add('visible')
           .add('color')
           .add('intensity', 0, 2);
-      helpers.add(ctrl.helper);
+      if (ctrl.helper) helpers.add(ctrl.helper);
 
       // Rect Area light
       light = new THREE.RectAreaLight(0xffffff, 1, 5, 5);
@@ -234,7 +234,7 @@
           .add('visible')
           .add('color')
           .add('intensity', 0, 5);
-      helpers.add(ctrl.helper);
+      if (ctrl.helper) helpers.add(ctrl.helper);
 
       // Spot Light
       light = new THREE.SpotLight();
@@ -254,7 +254,7 @@
           .add('angle', 0, 1)
           .add('penumbra', 0, 1)
           .add('decay', 1, 2);
-      helpers.add(ctrl.helper);
+      if (ctrl.helper) helpers.add(ctrl.helper);
 
       scene.add(lights);
       scene.add(helpers);
