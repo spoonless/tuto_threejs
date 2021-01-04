@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset=utf-8>
+    <title>three.js app</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="js/three.min.js"></script>
+    <script src="js/OrbitControls.js"></script>
+    <script src="js/GLTFLoader.js"></script>
+    <script src="js/dat.gui.min.js"></script>
+    <script>
+      function LightController(light) {
+
+        var helper;
+        var internalProps = {};
+
+        if (light.isDirectionalLight) {
+          helper = new THREE.DirectionalLightHelper(light);
+        } else if (light.isHemisphereLight) {
+          helper = new THREE.HemisphereLightHelper(light);
+        } else if (light.isPointLight) {
+          helper = new THREE.PointLightHelper(light);
+        } else if (light.isRectAreaLight && THREE.RectAreaLightHelper) {
+          helper = new THREE.RectAreaLightHelper(light);
+        } else if (light.isSpotLight) {
+          helper = new THREE.SpotLightHelper(light);
+        }
+
+        if (helper) {
+          helper.visible = light.visible;
+        }
+
+        this.on = function(gui) {
+          gui.closed = !light.visible;
+          return {
+            add: function(property, minV, maxV, step) {
+              if (property in light && light[property] instanceof THREE.Color) {
+                internalProps[property] = light[property].getHex();
+                var ctrl = gui.addColor(internalProps, property);
+                ctrl.onChange(function(v) {
+                  light[property].setHex(v);
+                  if (helper) {
+                    helper.update();
+                  }
+                });
+                return this;
+              }
+              if (property in light) {
+                internalProps[property] = light[property];
+                var ctrl = gui.add(internalProps, property);
+                if (minV != undefined) {
+                  ctrl = ctrl.min(minV);
+                }
+                if (maxV != undefined) {
+                  ctrl = ctrl.max(maxV);
+                }
+                if (step != undefined) {
+                  ctrl = ctrl.step(step);
+                }
+                ctrl.onChange(function(v) {
+                  light[property] = v;
+                  if (helper) {
+                    helper.update();
+                    if (property == "visible") {
+                      helper.visible = light.visible;
+                    }
+                  }
+                });
+              }
+              return this;
+            }
+          };
+        }
+
+        this.helper = helper;
+      }
+
+      // création du renderer
+      var renderer = new THREE.WebGLRenderer({"antialias": true});
+      document.body.appendChild(renderer.domElement);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      // création de la caméra
+      var camera = new THREE.PerspectiveCamera(45, 1, 0.1, 10);
+
+      function updateViewportSize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix()
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      window.addEventListener("resize", updateViewportSize);
+      updateViewportSize();
+
+      // création de la scène
+      var scene = new THREE.Scene();
+      scene.background = new THREE.Color(1, 1, 1);
+
+      var gui = new dat.GUI();
+
+      // création des lumières
+      var lights = new THREE.Group();
+      lights.position.y = 1;
+      var helpers = new THREE.Group();
+      helpers.visible = false;
+
+      gui.add(helpers, 'visible').name("Display helpers");
+
+      // Ambient Light
+      var light = new THREE.AmbientLight(0xffffff, .14);
+      lights.add(light);
+
+      var ctrl = new LightController(light);
+      ctrl.on(gui.addFolder('Ambient light'))
+          .add('visible')
+          .add('color')
+          .add('intensity', 0, 1.0);
+
+      // Hemisphere light
+      light = new THREE.HemisphereLight();
+      light.visible = true;
+      light.position.set(0,4,0);
+      light.intensity = .35;
+      lights.add(light);
+
+      ctrl = new LightController(light);
+      ctrl.on(gui.addFolder('Hemisphere light'))
+          .add('visible')
+          .add('color')
+          .add('groundColor')
+          .add('intensity', 0, 2);
+      helpers.add(ctrl.helper);
+
+      // Rect Area light
+      light = new THREE.RectAreaLight(0xffffff, 1.72, 5, 5);
+      light.position.set(0, 2, 4);
+      light.lookAt(0,0.2,0);
+      lights.add(light);
+
+      ctrl = new LightController(light);
+      ctrl.on(gui.addFolder('Rect Area light'))
+          .add('visible')
+          .add('color')
+          .add('intensity', 0, 5);
+      helpers.add(ctrl.helper);
+
+      scene.add(lights);
+      scene.add(helpers);
+
+      // positionnement de la caméra
+      camera.position.z = 1;
+      camera.position.y = 0.2;
+
+      var controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enablePan = false;
+      controls.target.y = .2;
+      controls.minDistance = .6;
+      controls.maxDistance = 5;
+
+      // Chargement de la scène GLTF
+      var loader = new THREE.GLTFLoader();
+
+      loader.load('models/robot/model.glb', function (gltf) {
+          scene.add(gltf.scene);
+        },
+        undefined,
+        function (error) {
+          console.error(error);
+      });
+
+      function animate() {
+        controls.update();
+
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+
+      animate();
+    </script>
+  </body>
+</html>
+
