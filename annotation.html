@@ -51,7 +51,7 @@
       empty.position.y = .75;
       cube.add(empty);
 
-      function getPositionOnScreen(canvas, camera, object3d) {
+      function getPositionOnScreen(renderer, camera, object3d) {
         var vector = new THREE.Vector3();
         object3d.getWorldPosition(vector).project(camera);
         var domRect = renderer.domElement.getBoundingClientRect();
@@ -72,7 +72,7 @@
         // mise à jour du contrôleur
         controls.update();
 
-        var pos = getPositionOnScreen(renderer.domElement, camera, empty);
+        var pos = getPositionOnScreen(renderer, camera, empty);
         panneau.style.left = pos.x + "px";
         panneau.style.top = pos.y + "px";
 
