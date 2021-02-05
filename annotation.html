@@ -43,7 +43,7 @@
 
       var scene = new THREE.Scene();
 
-      var cube = new THREE.Mesh(new THREE.BoxGeometry());
+      var cube = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshNormalMaterial());
       scene.add(cube);
 
       var empty = new THREE.Object3D();
@@ -51,14 +51,14 @@
       empty.position.y = .75;
       cube.add(empty);
 
-      function getPositionOnScreen(camera, object3d) {
+      function getPositionOnScreen(canvas, camera, object3d) {
         var vector = new THREE.Vector3();
         object3d.getWorldPosition(vector).project(camera);
+        var domRect = renderer.domElement.getBoundingClientRect();
         // On passe des coordonnées dans le repère normalisé (NDC) aux
         // coordonnées de l'écran
-        vector.x = Math.round((vector.x + 1) / 2 * window.innerWidth);
-        vector.y = Math.round(-(vector.y - 1) / 2 * window.innerHeight);
-
+        vector.x = Math.round((vector.x + 1) / 2 * domRect.width) + domRect.left;
+        vector.y = Math.round((1 - vector.y) / 2 * domRect.height) + domRect.top;
         return vector;
       }
 
@@ -72,7 +72,7 @@
         // mise à jour du contrôleur
         controls.update();
 
-        var pos = getPositionOnScreen(camera, empty);
+        var pos = getPositionOnScreen(renderer.domElement, camera, empty);
         panneau.style.left = pos.x + "px";
         panneau.style.top = pos.y + "px";
 
